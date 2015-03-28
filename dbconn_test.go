@@ -1,31 +1,32 @@
 package main
 
 import (
-	"testing"
-	"encoding/gob"
-	"bytes"
-	_"fmt"
-	"os"
-	"log"
-	"database/sql"
+    "testing"
+    "encoding/gob"
+    "bytes"
+    _"fmt"
+    "os"
+    "log"
+    "database/sql"
+    "fmt"
 )
 
-func TestMain(m* testing.M) {
-	setup()
-	retCode := m.Run()
-	teardown()
-	os.Exit(retCode)
+func TestMain(m*testing.M) {
+    setup()
+    retCode := m.Run()
+    teardown()
+    os.Exit(retCode)
 }
 
 func setup() {
-	os.Remove("./test.db")
-	db, err := sql.Open("sqlite3", "./test.db")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer db.Close()
+    os.Remove("./test.db")
+    db, err := sql.Open("sqlite3", "./test.db")
+    if err != nil {
+        log.Fatal(err)
+    }
+    defer db.Close()
 
-	sqlStmt := `
+    sqlStmt := `
 	CREATE TABLE photos (
 	id			INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, 
 	time			INTEGER NOT NULL, 
@@ -57,45 +58,64 @@ INSERT INTO photos VALUES(18,1026565108,'file:///tmp/database/','sample_xap.jpg'
 INSERT INTO photos VALUES(19,1093249257,'file:///tmp/database/','sample_xmpcrash.jpg','',1,1,0);
 INSERT INTO photos VALUES(20,1276191607,'file:///tmp/database/test/','sample_tangled1.jpg','test comment',1,1,0);
 	`
-	_, err = db.Exec(sqlStmt)
-	if err != nil {
-		log.Printf("%q: %s\n", err, sqlStmt)
-		return
-	}
+    _, err = db.Exec(sqlStmt)
+    if err != nil {
+        log.Printf("%q: %s\n", err, sqlStmt)
+        return
+    }
 }
 
 func teardown() {
-	os.Remove("./test.db")
+    os.Remove("./test.db")
 }
 
-func Test_DbCreation(t* testing.T) {
-	db := NewDb("./test.db")
+func Test_DbCreation(t*testing.T) {
+    db := NewDb("./test.db")
 
-	if db == nil {
-		t.Error("Db object is nil")
-	}
+    if db == nil {
+        t.Error("Db object is nil")
+    }
 }
 
-func Test_SelectFromTable(t* testing.T) {
-	db := NewDb("./test.db")
-	if db == nil {
-		t.Error("Db object is nil")
-	}
+func Test_SelectFromTable(t*testing.T) {
+    db := NewDb("./test.db")
+    if db == nil {
+        t.Error("Db object is nil")
+    }
 
-	tabledata := db.SelectAllFrom("photos")
+    params := Params{tablename:"photos"}
+    tabledata, _ := db.SelectAllFrom(params)
+    expected := 20
+    if(len(tabledata) != expected) {
+        t.Errorf("Got %v rows but expected %v.", len(tabledata), expected)
+    }
+}
 
-	b := new(bytes.Buffer)
-	e := gob.NewEncoder(b)
-	err := e.Encode(tabledata)
-	if err != nil {
-		panic(err)
-	}
-	var decoded []map[string]string
-	d := gob.NewDecoder(b)
-	err = d.Decode(&decoded)
-	if err != nil {
-		panic(err)
-	}
+func Test_SelectFromTableWithLimit(t*testing.T) {
+    db := NewDb("./test.db")
+    if db == nil {
+        t.Error("Db object is nil")
+    }
 
-	// fmt.Printf("%#v\n", decoded)
+    params := Params{tablename:"photos", limit:"2,5"}
+    tabledata, _ := db.SelectAllFrom(params)
+    expected := 5
+    if(len(tabledata) != expected) {
+        t.Errorf("Got %v rows but expected %v.", len(tabledata), expected)
+    }
+
+    expectedIdOfFirstRow := "3"
+    if(tabledata[0]["id"] != expectedIdOfFirstRow) {
+        t.Errorf("Got first row with id %v but expected id %v.", tabledata[0]["id"], expectedIdOfFirstRow)
+    }
+}
+
+func logDecodedResult(tabledata []map[string]string) {
+    b := new(bytes.Buffer)
+    e := gob.NewEncoder(b)
+    _ = e.Encode(tabledata)
+    var decoded []map[string]string
+    d := gob.NewDecoder(b)
+    _ = d.Decode(&decoded)
+    fmt.Printf("%#v\n", decoded);
 }

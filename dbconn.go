@@ -16,21 +16,28 @@ func NewDb(dbstr string) (db *Db) {
     return db
 }
 
-func (db Db) SelectAllFrom(tablename string) ([]map[string]string) {
+func (db *Db) SelectAllFrom(params Params) ([]map[string]string, error) {
     sqldb, err := connect(db.dbstr)
-    tabledata := []map[string]string{}
-    if (err != nil) {
-        defer sqldb.Close()
+
+    if err != nil {
+        return nil, err
     }
 
-    sqlstmt := "SELECT * FROM "+tablename
+    defer sqldb.Close()
+    sqlstmt := params.GetSql()
+    return db.querySql(sqldb, sqlstmt);
+}
 
+func (db *Db) querySql(sqldb *sql.DB, sqlstmt string) ([]map[string]string, error) {
+    log.Printf("Executing sql statement %s", sqlstmt)
     rows, err := sqldb.Query(sqlstmt)
     if err != nil {
-        log.Printf("%q: %s\n", err, sqlstmt)
+        return nil, err
     }
+
     defer rows.Close()
 
+    tabledata := []map[string]string{}
     columns, _ := rows.Columns()
     rawResult := make([][]byte, len(columns))
 
@@ -39,7 +46,6 @@ func (db Db) SelectAllFrom(tablename string) ([]map[string]string) {
     for i, _ := range rawResult {
         dest[i] = &rawResult[i] // Put pointers to each string in the interface slice
     }
-
 
     for rows.Next() {
         rowdata := make(map[string]string)
@@ -55,7 +61,7 @@ func (db Db) SelectAllFrom(tablename string) ([]map[string]string) {
         tabledata = append(tabledata, rowdata)
     }
 
-    return tabledata
+    return tabledata, nil
 }
 
 func connect(dbfile string) (db *sql.DB, err error) {
