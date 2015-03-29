@@ -2,13 +2,10 @@ package db
 
 import (
     "testing"
-    "encoding/gob"
-    "bytes"
     _"fmt"
     "os"
     "log"
     "database/sql"
-    "fmt"
 )
 
 func TestMain(m*testing.M) {
@@ -108,14 +105,4 @@ func Test_SelectFromTableWithLimit(t*testing.T) {
     if(tabledata[0]["id"] != expectedIdOfFirstRow) {
         t.Errorf("Got first row with id %v but expected id %v.", tabledata[0]["id"], expectedIdOfFirstRow)
     }
-}
-
-func logDecodedResult(tabledata []map[string]string) {
-    b := new(bytes.Buffer)
-    e := gob.NewEncoder(b)
-    _ = e.Encode(tabledata)
-    var decoded []map[string]string
-    d := gob.NewDecoder(b)
-    _ = d.Decode(&decoded)
-    fmt.Printf("%#v\n", decoded);
 }
