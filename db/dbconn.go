@@ -1,4 +1,4 @@
-package main
+package db
 
 import (
     "database/sql"
@@ -16,7 +16,7 @@ func NewDb(dbstr string) (db *Db) {
     return db
 }
 
-func (db *Db) SelectAllFrom(params Params) ([]map[string]string, error) {
+func (db *Db) SelectAllFrom(params* Params) ([]map[string]string, error) {
     sqldb, err := connect(db.dbstr)
 
     if err != nil {

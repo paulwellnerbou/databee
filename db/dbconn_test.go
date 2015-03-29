@@ -1,4 +1,4 @@
-package main
+package db
 
 import (
     "testing"
@@ -84,7 +84,7 @@ func Test_SelectFromTable(t*testing.T) {
     }
 
     params := Params{tablename:"photos"}
-    tabledata, _ := db.SelectAllFrom(params)
+    tabledata, _ := db.SelectAllFrom(&params)
     expected := 20
     if(len(tabledata) != expected) {
         t.Errorf("Got %v rows but expected %v.", len(tabledata), expected)
@@ -98,7 +98,7 @@ func Test_SelectFromTableWithLimit(t*testing.T) {
     }
 
     params := Params{tablename:"photos", limit:"2,5"}
-    tabledata, _ := db.SelectAllFrom(params)
+    tabledata, _ := db.SelectAllFrom(&params)
     expected := 5
     if(len(tabledata) != expected) {
         t.Errorf("Got %v rows but expected %v.", len(tabledata), expected)
