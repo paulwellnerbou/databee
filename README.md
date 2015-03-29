@@ -7,16 +7,24 @@ Any ideas?
 To configure your own databases, put a file named <code>config.json</code> in the working directory. If this file does not exist, the server will
 try to find the <code>config-example.json</code> and start with the test database for demonstration and/or testing purposes.
 
+Have a look at the config-example.json file for configuration options.
+
+## Database support
+
+For now, only sqlite3 is tested and supported. The basic functionality should work with all other databases supported by Go's <code>database/sql</code>. But the
+functionality to show all tables has to be implemented for each type separately.
+
 # Compiling and running from source
 
 You'll need Go 1.4. Just for compiling older Go versions would do as well, but I use <code>testing.M</code> for test fixture setup which comes with Go 1.4.
 
 To setup your Go environment have a look at [](https://golang.org/doc/code.html) and [](http://skife.org/golang/2013/03/24/go_dev_env.html).
 
-${CoolProjectNameToBeDefined} needs Mattn's [go-sqlite3](https://github.com/mattn/go-sqlite3)
+${CoolProjectNameToBeDefined} needs Mattn's go-sqlite3: [](https://github.com/mattn/go-sqlite3)
 
 ```
-   go run serve.go ./..
+    go get github.com/mattn/go-sqlite3
+    go run serve.go ./..
 ```
 
 You will see something similar to this in the stdout:
