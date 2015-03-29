@@ -83,7 +83,7 @@ func Test_SelectFromTable(t*testing.T) {
         t.Error("Db object is nil")
     }
 
-    params := Params{tablename:"photos"}
+    params := Params{Tablename:"photos"}
     tabledata, _ := db.SelectAllFrom(&params)
     expected := 20
     if(len(tabledata) != expected) {
@@ -97,7 +97,7 @@ func Test_SelectFromTableWithLimit(t*testing.T) {
         t.Error("Db object is nil")
     }
 
-    params := Params{tablename:"photos", limit:"2,5"}
+    params := Params{Tablename:"photos", limit:"2,5"}
     tabledata, _ := db.SelectAllFrom(&params)
     expected := 5
     if(len(tabledata) != expected) {

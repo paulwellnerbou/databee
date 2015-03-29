@@ -7,7 +7,7 @@ import (
 )
 
 type Params struct {
-    tablename string
+    Tablename string
     limit string
 }
 
@@ -17,7 +17,9 @@ func NewParamsFromUrl(requestedUrl *url.URL) (*Params) {
     splitted := strings.Split(cleanedPath, "/")
     m, _ := url.ParseQuery(requestedUrl.RawQuery)
     params := new(Params)
-    params.tablename = splitted[0]
+    if len(splitted) > 1 {
+        params.Tablename = splitted[1]
+    }
     params.mapQueryParams(m)
     return params
 }
@@ -28,10 +30,14 @@ func (params *Params) mapQueryParams(m map[string][]string) {
     }
 }
 
-func (params *Params) GetSql() (sql string) {
-    sql = "SELECT * FROM " + params.tablename
+func (params *Params) GetSelectSql() (sql string) {
+    sql = "SELECT * FROM " + params.Tablename
     if len(params.limit) > 0 {
         sql += " limit "+params.limit
     }
     return
+}
+
+func (params *Params) GetShowTablesSql() (sql string) {
+    return "SELECT name FROM sqlite_master WHERE type='table'"
 }

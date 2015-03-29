@@ -1,0 +1,10 @@
+{
+  "port" : "7242",
+  "databases" : [
+    {
+      "alias": "db",
+      "dbDriver": "sqlite3",
+      "dbConnectionString": "db/testdata/f-spot-test.db"
+    }
+  ]
+}

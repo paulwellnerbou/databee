@@ -16,6 +16,18 @@ func NewDb(dbstr string) (db *Db) {
     return db
 }
 
+func (db *Db) ShowTables(params* Params) ([]map[string]string, error) {
+    sqldb, err := connect(db.dbstr)
+
+    if err != nil {
+        return nil, err
+    }
+
+    defer sqldb.Close()
+    sqlstmt := params.GetShowTablesSql()
+    return db.querySql(sqldb, sqlstmt);
+}
+
 func (db *Db) SelectAllFrom(params* Params) ([]map[string]string, error) {
     sqldb, err := connect(db.dbstr)
 
@@ -24,7 +36,7 @@ func (db *Db) SelectAllFrom(params* Params) ([]map[string]string, error) {
     }
 
     defer sqldb.Close()
-    sqlstmt := params.GetSql()
+    sqlstmt := params.GetSelectSql()
     return db.querySql(sqldb, sqlstmt);
 }
 
