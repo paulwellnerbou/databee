@@ -8,9 +8,10 @@ import (
     "github.com/paulwellnerbou/db-json-server/marshal"
     "github.com/paulwellnerbou/db-json-server/config"
     "os"
+    "strings"
 )
 
-const configFile = "config.json"
+const defaultConfigFile = "config.json"
 const testConfigFile = "config-example.json"
 
 var configuration config.Configuration
@@ -24,7 +25,7 @@ func selectHandler(w http.ResponseWriter, r *http.Request, dbConnectionString st
     renderResult(w, &data, err)
 }
 
-func renderResult(w http.ResponseWriter, data* []map[string]string, err error) {
+func renderResult(w http.ResponseWriter, data*[]map[string]string, err error) {
     w.Header().Set("Content-Type", "application/json")
     if err != nil {
         log.Printf("ERROR: %v", err.Error())
@@ -47,13 +48,31 @@ func configHandler(w http.ResponseWriter, r *http.Request) {
     fmt.Fprint(w, string(marshal.Jsonize(configuration)))
 }
 
-func main() {
-    if !Exists(configFile) {
-        log.Printf("WARNING: Expected config file %s not found, using %s for demonstration and test purposes.", configFile, testConfigFile)
-        configuration.LoadFromFile(testConfigFile)
-    } else {
-        configuration.LoadFromFile(configFile)
+func detectConfigFileToUse(args []string) (string) {
+    for _, arg := range args {
+        if strings.HasPrefix(arg, "--config=") {
+            configFile := strings.Split(arg, "=")[1]
+            if !Exists(configFile) {
+                log.Printf("FATAL: Expected config file %s not found, Exiting.", configFile)
+                os.Exit(1)
+            } else {
+                return configFile;
+            }
+        }
     }
+
+    if !Exists(defaultConfigFile) {
+        log.Printf("WARNING: Expected config file %s not found, using %s for demonstration and test purposes.", defaultConfigFile, testConfigFile)
+        return testConfigFile
+    }
+
+    return defaultConfigFile
+}
+
+func main() {
+    configFile := detectConfigFileToUse(os.Args)
+    log.Printf("Loading configuration from %s", configFile)
+    configuration.LoadFromFile(configFile)
     log.Printf("Got configuration %#v", configuration)
 
     http.HandleFunc("/config", configHandler)
@@ -69,7 +88,10 @@ func main() {
     }
 
     log.Printf("Server up and running under port %s. Go to /config to see the actual configuration of databases.", configuration.Port)
-    http.ListenAndServe(":"+configuration.Port, nil)
+    err := http.ListenAndServe(":"+configuration.Port, nil)
+    if err != nil {
+        log.Fatal("ListenAndServe: ", err)
+    }
 }
 
 // credits to http://stackoverflow.com/a/12527546/4579247
