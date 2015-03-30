@@ -18,9 +18,9 @@ functionality to show all tables has to be implemented for each type separately.
 
 You'll need Go 1.4. Just for compiling older Go versions would do as well, but I use <code>testing.M</code> for test fixture setup which comes with Go 1.4.
 
-To setup your Go environment have a look at [](https://golang.org/doc/code.html) and [](http://skife.org/golang/2013/03/24/go_dev_env.html).
+To setup your Go environment have a look at https://golang.org/doc/code.html and http://skife.org/golang/2013/03/24/go_dev_env.html.
 
-${CoolProjectNameToBeDefined} needs Mattn's go-sqlite3: [](https://github.com/mattn/go-sqlite3)
+${CoolProjectNameToBeDefined} needs Mattn's go-sqlite3: https://github.com/mattn/go-sqlite3
 
 ```
     go get github.com/mattn/go-sqlite3
