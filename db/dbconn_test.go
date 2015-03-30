@@ -6,6 +6,9 @@ import (
     "os"
     "log"
     "database/sql"
+    "sync"
+    "strconv"
+    "time"
 )
 
 func TestMain(m*testing.M) {
@@ -13,6 +16,80 @@ func TestMain(m*testing.M) {
     retCode := m.Run()
     teardown()
     os.Exit(retCode)
+}
+
+func Test_ConcurrentReads(t*testing.T) {
+    db := NewDb("./test.db")
+
+    var wg sync.WaitGroup
+
+    for i := 0; i < 20; i++ {
+        wg.Add(1)
+        go func(i int) {
+            // Decrement the counter when the goroutine completes.
+            defer wg.Done()
+            // log start and end to show concurrency
+            t.Logf("Started go routine %d", i)
+            params := Params{Tablename:"photos", limit: strconv.Itoa(i) + ",1"}
+            tabledata, err := db.SelectAllFrom(&params)
+            time.Sleep(time.Millisecond)
+            if err != nil {
+                t.Errorf("Error: %s", err.Error())
+            } else if len(tabledata) != 1 {
+                t.Errorf("Expected %d row but got %d", 1, len(tabledata))
+            } else if tabledata[0]["id"] != strconv.Itoa(i+1) {
+                t.Errorf("Expected id of row %d to be %d but got %s", i, i+1, tabledata[0]["id"])
+            }
+            t.Logf("Ended go routine %d", i)
+        }(i)
+    }
+
+    wg.Wait()
+}
+
+func Test_DbCreation(t*testing.T) {
+    db := NewDb("./test.db")
+
+    if db == nil {
+        t.Error("Db object is nil")
+    }
+}
+
+func Test_SelectFromTable(t*testing.T) {
+    db := NewDb("./test.db")
+    if db == nil {
+        t.Error("Db object is nil")
+    }
+
+    params := Params{Tablename:"photos"}
+    tabledata, _ := db.SelectAllFrom(&params)
+    expected := 20
+    if (len(tabledata) != expected) {
+        t.Errorf("Got %v rows but expected %v.", len(tabledata), expected)
+    }
+}
+
+func Test_SelectFromTableWithLimit(t*testing.T) {
+    db := NewDb("./test.db")
+    if db == nil {
+        t.Error("Db object is nil")
+    }
+
+    params := Params{Tablename:"photos", limit:"2,5"}
+    tabledata, _ := db.SelectAllFrom(&params)
+    expected := 5
+    if (len(tabledata) != expected) {
+        t.Errorf("Got %v rows but expected %v.", len(tabledata), expected)
+    }
+
+    expectedIdOfFirstRow := "3"
+    if (tabledata[0]["id"] != expectedIdOfFirstRow) {
+        t.Errorf("Got first row with id %v but expected id %v.", tabledata[0]["id"], expectedIdOfFirstRow)
+    }
+}
+
+func teardown() {
+    os.Remove("./test.db")
 }
 
 func setup() {
@@ -25,14 +102,14 @@ func setup() {
 
     sqlStmt := `
 	CREATE TABLE photos (
-	id			INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, 
-	time			INTEGER NOT NULL, 
-	base_uri		STRING NOT NULL, 
-	filename		STRING NOT NULL, 
-	description		TEXT NOT NULL, 
-	roll_id			INTEGER NOT NULL, 
-	default_version_id	INTEGER NOT NULL, 
-	rating			INTEGER NULL 
+	id			INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+	time			INTEGER NOT NULL,
+	base_uri		STRING NOT NULL,
+	filename		STRING NOT NULL,
+	description		TEXT NOT NULL,
+	roll_id			INTEGER NOT NULL,
+	default_version_id	INTEGER NOT NULL,
+	rating			INTEGER NULL
 );
 INSERT INTO photos VALUES(1,1249579156,'file:///tmp/database/','sample.jpg','Testing!',1,2,5);
 INSERT INTO photos VALUES(2,1276191607,'file:///tmp/database/','sample_canon_bibble5.jpg','',1,1,0);
@@ -59,50 +136,5 @@ INSERT INTO photos VALUES(20,1276191607,'file:///tmp/database/test/','sample_tan
     if err != nil {
         log.Printf("%q: %s\n", err, sqlStmt)
         return
-    }
-}
-
-func teardown() {
-    os.Remove("./test.db")
-}
-
-func Test_DbCreation(t*testing.T) {
-    db := NewDb("./test.db")
-
-    if db == nil {
-        t.Error("Db object is nil")
-    }
-}
-
-func Test_SelectFromTable(t*testing.T) {
-    db := NewDb("./test.db")
-    if db == nil {
-        t.Error("Db object is nil")
-    }
-
-    params := Params{Tablename:"photos"}
-    tabledata, _ := db.SelectAllFrom(&params)
-    expected := 20
-    if(len(tabledata) != expected) {
-        t.Errorf("Got %v rows but expected %v.", len(tabledata), expected)
-    }
-}
-
-func Test_SelectFromTableWithLimit(t*testing.T) {
-    db := NewDb("./test.db")
-    if db == nil {
-        t.Error("Db object is nil")
-    }
-
-    params := Params{Tablename:"photos", limit:"2,5"}
-    tabledata, _ := db.SelectAllFrom(&params)
-    expected := 5
-    if(len(tabledata) != expected) {
-        t.Errorf("Got %v rows but expected %v.", len(tabledata), expected)
-    }
-
-    expectedIdOfFirstRow := "3"
-    if(tabledata[0]["id"] != expectedIdOfFirstRow) {
-        t.Errorf("Got first row with id %v but expected id %v.", tabledata[0]["id"], expectedIdOfFirstRow)
     }
 }
