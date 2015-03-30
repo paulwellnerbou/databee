@@ -32,7 +32,6 @@ func Test_ConcurrentReads(t*testing.T) {
             t.Logf("Started go routine %d", i)
             params := Params{Tablename:"photos", limit: strconv.Itoa(i) + ",1"}
             tabledata, err := db.SelectAllFrom(&params)
-            time.Sleep(time.Millisecond)
             if err != nil {
                 t.Errorf("Error: %s", err.Error())
             } else if len(tabledata) != 1 {
