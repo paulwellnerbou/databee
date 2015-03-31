@@ -8,7 +8,6 @@ import (
     "database/sql"
     "sync"
     "strconv"
-    "time"
 )
 
 func TestMain(m*testing.M) {
