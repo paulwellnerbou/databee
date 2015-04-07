@@ -26,7 +26,7 @@ func selectHandler(w http.ResponseWriter, r *http.Request, dbConnectionString st
 }
 
 func renderResult(w http.ResponseWriter, data*[]map[string]string, err error) {
-    w.Header().Set("Content-Type", "application/json")
+    addJsonAndCorsHeader(w);
     if err != nil {
         log.Printf("ERROR: %v", err.Error())
         http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -44,8 +44,13 @@ func callDatabase(configuredDatabase *db.Db, params *db.Params) ([]map[string]st
 }
 
 func configHandler(w http.ResponseWriter, r *http.Request) {
-    w.Header().Set("Content-Type", "application/json")
+    addJsonAndCorsHeader(w);
     fmt.Fprint(w, string(marshal.Jsonize(configuration)))
+}
+
+func addJsonAndCorsHeader(w http.ResponseWriter) {
+    w.Header().Set("Access-Control-Allow-Origin", "*")
+    w.Header().Set("Content-Type", "application/json")
 }
 
 func detectConfigFileToUse(args []string) (string) {
