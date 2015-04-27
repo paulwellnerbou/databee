@@ -1,8 +1,6 @@
-# ${CoolProjectNameToBeDefined}
+# databee
 
-Any ideas?
-
-# Configuring
+## Configuring
 
 To configure your own databases, put a file named <code>config.json</code> in the working directory. If this file does not exist, the server will
 try to find the <code>config-example.json</code> and start with the test database for demonstration and/or testing purposes.
@@ -20,7 +18,7 @@ You'll need Go 1.4. Just for compiling older Go versions would do as well, but I
 
 To setup your Go environment have a look at https://golang.org/doc/code.html and http://skife.org/golang/2013/03/24/go_dev_env.html.
 
-${CoolProjectNameToBeDefined} needs Mattn's go-sqlite3: https://github.com/mattn/go-sqlite3
+databee needs Mattn's go-sqlite3: https://github.com/mattn/go-sqlite3
 
 ```
     go get github.com/mattn/go-sqlite3
@@ -49,4 +47,4 @@ $ go run serve.go ./...
     go install
 ```
 
-You will find the binary <code>${CoolProjectNameToBeDefined}</code> under <code>$GOPATH/bin</code>.
+You will find the binary <code>databee</code> under <code>$GOPATH/bin</code>.
