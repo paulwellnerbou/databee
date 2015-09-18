@@ -4,9 +4,9 @@ import (
     "fmt"
     "net/http"
     "log"
-    "github.com/paulwellnerbou/db-json-server/db"
-    "github.com/paulwellnerbou/db-json-server/marshal"
-    "github.com/paulwellnerbou/db-json-server/config"
+    "github.com/paulwellnerbou/databee/db"
+    "github.com/paulwellnerbou/databee/marshal"
+    "github.com/paulwellnerbou/databee/config"
     "os"
     "strings"
 )
